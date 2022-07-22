@@ -34,7 +34,7 @@ jobs:
           repository: 'XRPLF/clio-ci'
 
       - name: Build
-        uses: XRPLF/clio-gha/build@main
+        uses: legleux/clio-gha/build@dockerfile
 
       - name: Artifact packages
         uses: actions/upload-artifact@v3
