@@ -1,0 +1,26 @@
+---
+  apiVersion: v1
+  kind: Namespace
+  metadata:
+    name: clio
+
+---
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: rippled
+    labels:
+      app: rippled
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: rippled
+    template:
+      metadata:
+        labels:
+          app: rippled
+      spec:
+        containers:
+        - name: rippled
+          image: legleux/rippled

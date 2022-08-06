@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: clio
+  labels:
+    app: rippled
+  name: rippled
+spec:
+  clusterIP: None
+  ports:
+  - name: ws
+    port: 6005
+  - name: grpc
+    port: 50051
+  - name: peer
+    port: 51235
+  selector:
+    app: rippled
