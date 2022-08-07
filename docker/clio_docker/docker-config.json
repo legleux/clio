@@ -16,14 +16,14 @@
     "etl_sources":
     [
         {
-            "ip":"rippled",
+            "ip":"10.0.0.3",
             "ws_port":"6005",
             "grpc_port":"50051"
         }
     ],
     "dos_guard":
     {
-        "whitelist":["rippled"]
+        "whitelist":["10.0.0.3"]
     },
     "server":{
         "ip":"0.0.0.0",

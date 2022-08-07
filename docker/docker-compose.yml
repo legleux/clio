@@ -10,7 +10,8 @@ services:
     # volumes:
     #   - ./data/clio:/var/log/clio
     networks:
-      - clio_net
+     clio-net:
+       ipv4_address: 10.0.0.2
 
   rippled:
     container_name: rippled
@@ -19,13 +20,14 @@ services:
     command: test
     environment:
       NETWORK: "test" # main, test, dev
-      CONFIG:   "/opt/ripple/etc/rippled-test.cfg"
+      CONFIG: "/opt/ripple/etc/rippled-test.cfg"
     volumes:
         - ./rippled_docker/cfg:/opt/ripple/etc
     #   - ./data/rippled/var/lib:/var/lib/rippled
     #   - ./data/rippled/var/log:/var/log/rippled
     networks:
-      - clio_net
+     clio-net:
+       ipv4_address: 10.0.0.3
 
   db:
     container_name: cassandra
@@ -33,8 +35,14 @@ services:
     # volumes:
     #   - ./data/cassandra:/var/lib/cassandra
     networks:
-      - clio_net
+     clio-net:
+       ipv4_address: 10.0.0.4
 
 networks:
-  clio_net:
-    name: clio_net
+  clio-net:
+    name: clio-net
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.0.0.0/16
+         gateway: 10.0.0.1
