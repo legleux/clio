@@ -12,4 +12,5 @@ RUN echo "deb [signed-by=/usr/local/share/keyrings/ripple-key.gpg] https://repos
 RUN apt-get update && apt-get install -y clio
 COPY docker-config.json "/opt/clio/etc/config.json"
 
-CMD [ "/opt/clio/bin/clio_server", "/opt/clio/etc/config.json" ]
+COPY /entrypoint.sh /entrypoint.sh
+ENTRYPOINT [ "/entrypoint.sh" ]

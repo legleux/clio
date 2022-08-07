@@ -14,8 +14,8 @@ RUN apt-get install -y vim curl ncdu jq
 
 FROM ubuntu:20.04
 
-COPY rippled-*.cfg /opt/ripple/etc/
-COPY validators-*.txt /opt/ripple/etc/
+COPY cfg/rippled-*.cfg /opt/ripple/etc/
+COPY cfg/validators-*.txt /opt/ripple/etc/
 COPY check_state.sh /
 COPY --from=pre /usr/bin/jq /usr/bin/jq
 COPY --from=pre /lib/x86_64-linux-gnu/libjq.so.1 /lib/x86_64-linux-gnu/libjq.so.1
@@ -24,6 +24,6 @@ COPY --from=pre /opt/ripple/ /opt/ripple/
 
 ADD ./entrypoint.sh /entrypoint.sh
 
-EXPOSE 5005 5006 6005 50051 51235
+# EXPOSE 5005 5006 6005 50051 51235
 
 ENTRYPOINT ["./entrypoint.sh"]

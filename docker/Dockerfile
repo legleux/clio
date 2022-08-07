@@ -43,8 +43,10 @@ RUN strip clio/build/clio_server
 RUN strip clio/build/clio_tests
 RUN cp /clio/build/clio_tests /output
 RUN cp /clio/build/clio_server /output
-RUN cp /clio/example-config.json /output
+RUN mv /clio/example-config.json /output/clio-config.json
 
 FROM ubuntu:20.04 AS clio
 COPY --from=build /output /clio
-CMD ["/clio/clio_server", "/clio/example-config.json"]
+RUN mkdir -p /etc/opt/clio && mv /clio/clio-config.json /etc/opt/clio/config.json
+
+CMD ["/clio/clio_server", "/etc/opt/clio/config.json"]

@@ -4,25 +4,28 @@ services:
   clio:
     container_name: clio_server
     image: clio
+    # command:
+    #   -   /opt/clio/etc/config.json"
     build: clio_docker
     # volumes:
     #   - ./data/clio:/var/log/clio
     networks:
-     clio-net:
-       ipv4_address: 10.0.0.2
+      - clio_net
 
   rippled:
     container_name: rippled
     image: rippled
     build: rippled_docker
-    ports:
-      - 5005
-    # volumes:
+    command: test
+    environment:
+      NETWORK: "test" # main, test, dev
+      CONFIG:   "/opt/ripple/etc/rippled-test.cfg"
+    volumes:
+        - ./rippled_docker/cfg:/opt/ripple/etc
     #   - ./data/rippled/var/lib:/var/lib/rippled
     #   - ./data/rippled/var/log:/var/log/rippled
     networks:
-     clio-net:
-       ipv4_address: 10.0.0.3
+      - clio_net
 
   db:
     container_name: cassandra
@@ -30,14 +33,8 @@ services:
     # volumes:
     #   - ./data/cassandra:/var/lib/cassandra
     networks:
-     clio-net:
-       ipv4_address: 10.0.0.4
+      - clio_net
 
 networks:
-  clio-net:
-    name: clio-net
-    driver: bridge
-    ipam:
-     config:
-       - subnet: 10.0.0.0/16
-         gateway: 10.0.0.1
+  clio_net:
+    name: clio_net
