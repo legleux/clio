@@ -24,10 +24,10 @@ This will create a docker network where the services can all connect to each oth
 
 ## Query running cassandra
 
-`docker exec cassandra bash -c "cqlsh -e 'use clio; select * from ledgers;' "`
+`docker exec cassandra bash -c "cqlsh -e 'use clio; select * from ledger_range;' "`
 
-    sequence | header
-    ----------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    72479380 | 0x0451f29401633bdbe2254541588e3e7ff4dacd3e7db3f9dcf07015a0eb5199f0f9e2fe4ce85b646cefdb7a2826a31758801258162a5f5a301c14db232d268668e3ab70e43493f98b8f3b341b59228bc2847c76439a1f1bdb54e9b340f2d596c4c2a4424b7a92a7328e28d7222a43de362a43de370a00b8f7101d67be6fbb9bfaff50ff7a9e82d1197d1a7df28871fa23058c68f896e5
 
-    (1 rows)
+ is_latest | sequence
+-----------+----------
+     False | 30202695
+      True | 30207415
