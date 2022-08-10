@@ -20,9 +20,11 @@ Get the container's ip:
 Check the latest ledger:
 
 `curl -s -X POST 10.0.0.2:8080 -d'{"method":"server_info"}' | jq '.result.cache'`
-
-    "Complete ledgers: 30202695-30207971"
-
+    {
+    "size": 8155257,
+    "is_full": true,
+    "latest_ledger_seq": 30222329
+    }
 
 ## Query rippled state
 
