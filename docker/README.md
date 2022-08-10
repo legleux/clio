@@ -19,7 +19,7 @@ Get the container's ip:
 
 Check the latest ledger:
 
-`curl -s -X POST 10.0.0.2:8080 -d'{"method":"server_info"}' | jq '.result.info | "Complete ledgers: " + .complete_ledgers'`
+`curl -s -X POST 10.0.0.2:8080 -d'{"method":"server_info"}' | jq '.result.cache'`
 
     "Complete ledgers: 30202695-30207971"
 
