@@ -1,12 +1,14 @@
 # Running Clio in Docker
 
 
-To build, just run `docker build . -t clio_server` in this directory.
-By default, running thi container will require a running cassandra instance and rippled.
+Run `docker build . -t clio` in the root of the repo.
+By default, running this container will require a running cassandra instance and rippled.
 To override the configuration in the container, mount the directory with your config at `/etc/opt/clio`
 i.e. `docker run --network=host -v $PWD/cfg:/etc/opt/clio clio_server`
 
-Use the docke-compose.yml to get a clio instance running with rippled, cassandra.
+## Docker compose
+
+Use the docker-compose.yml to get a clio instance running with rippled, cassandra.
 `docker compose up`
 This will create a docker network where the services can all connect to each other.
 
@@ -43,7 +45,7 @@ Check the latest ledger:
 
 The presence of the clio keyspace confirms clio can communicate with the database.
 
-    docker exec cassandra bash -c "cqlsh -e 'DESC keyspaces;' "
+`docker exec cassandra bash -c "cqlsh -e 'DESC keyspaces;' "`
 
     clio    system_auth         system_schema  system_views
     system  system_distributed  system_traces  system_virtual_schema
