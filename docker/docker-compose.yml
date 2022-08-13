@@ -21,8 +21,8 @@ services:
     environment:
       NETWORK: "test" # main, test, dev
       CONFIG: "/opt/ripple/etc/rippled-test.cfg"
-    volumes:
-        - ./rippled_docker/cfg:/opt/ripple/etc
+      #    volumes:
+    #   - ./rippled_docker/cfg:/opt/ripple/etc
     #   - ./data/rippled/var/lib:/var/lib/rippled
     #   - ./data/rippled/var/log:/var/log/rippled
     networks:
