@@ -14,8 +14,8 @@ RUN apt-get install -y vim curl ncdu jq
 
 FROM ubuntu:20.04
 
-COPY cfg/rippled-*.cfg /opt/ripple/etc/
-COPY cfg/validators-*.txt /opt/ripple/etc/
+COPY config/rippled-*.cfg /opt/ripple/etc/
+COPY config/validators-*.txt /opt/ripple/etc/
 COPY check_state.sh /
 COPY --from=pre /usr/bin/jq /usr/bin/jq
 COPY --from=pre /lib/x86_64-linux-gnu/libjq.so.1 /lib/x86_64-linux-gnu/libjq.so.1
