@@ -41,8 +41,25 @@ Check the latest ledger:
 
 ## Query cassandra
 
+The presence of the clio keyspace confirms clio can communicate with the database.
+
+    docker exec cassandra bash -c "cqlsh -e 'DESC keyspaces;' "
+
+    clio    system_auth         system_schema  system_views
+    system  system_distributed  system_traces  system_virtual_schema
+
+
+
 `docker exec cassandra bash -c "cqlsh -e 'use clio; select * from ledger_range;' "`
 
+Before Clio is current, you will see:
+
+
+    is_latest | sequence
+    -----------+----------
+
+
+When Clio finally is synced with rippled    :
 
     is_latest | sequence
     -----------+----------
