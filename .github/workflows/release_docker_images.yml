@@ -1,9 +1,10 @@
 name: Deploy docker images on release
 on:
   push:
-    branches: ['master', 'release', 'develop']
-    tags:
-    - '*.*.*'
+    branches:  [master, release, develop, develop-next]
+  pull_request:
+    branches:  [master, release, develop, develop-next]
+  workflow_dispatch:
 
 env:
   TEST_TAG: testlegleux/clio:test
@@ -59,6 +60,7 @@ jobs:
       -
         name: Build and push
         uses: docker/build-push-action@v3
+        if: ${{ github.event_name == 'push' }}
         with:
           context: .
           file: docker/Dockerfile
