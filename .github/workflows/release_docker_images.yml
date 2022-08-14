@@ -49,7 +49,7 @@ jobs:
           file: docker/Dockerfile
           build-args: |
               "IMAGE=clio"
-          context: .
+          context: docker
           load: true
           tags: ${{ env.TEST_TAG }}-${{ steps.tag_name.outputs.sha_short }}
       -
@@ -62,7 +62,7 @@ jobs:
         uses: docker/build-push-action@v3
         if: ${{ github.event_name == 'push' }}
         with:
-          context: .
+          context: docker
           file: docker/Dockerfile
           push: true
           tags: testlegleux/clio-${{ steps.tag_name.outputs.TAGNAME }}:${{ steps.tag_name.outputs.sha_short }}
