@@ -27,6 +27,6 @@ RUN mv /clio/example-config.json /output/example-config.json
 
 FROM ubuntu:20.04 AS clio
 COPY --from=build /output /clio
-RUN mkdir -p /etc/opt/clio && mv /clio/example-config.json /etc/opt/clio/config.json
+RUN mkdir -p /opt/clio/etc && mv /clio/example-config.json /opt/clio/etc/config.json
 
-CMD ["/clio/clio_server", "/etc/opt/clio/config.json"]
+CMD ["/clio/clio_server", "/opt/clio/etc/config.json"]

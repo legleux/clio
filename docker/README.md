@@ -1,23 +1,20 @@
-# Running Clio in Docker
-
+# Running Clio with Docker
 
 Run `docker build . -t clio` in the root of the repo.
 By default, running this container will require a running cassandra instance and rippled.
-To override the configuration in the container, mount the directory with your config at `/etc/opt/clio`
-i.e. `docker run --network=host -v $PWD/cfg:/etc/opt/clio clio_server`
-
+To override the configuration in the container, mount the directory with your config at `/opt/clio/etc`
+i.e. `docker run --network=host -v $PWD/<config dir>:/opt/clio/etc clio_server`
 ## Docker compose
 
-Use the docker-compose.yml to get a clio instance running with rippled, cassandra.
-`docker compose up`
+Run `docker compose up` in this directory to quickly get a Clio instance running quickly with rippled and cassandra.
 This will create a docker network where the services can all connect to each other.
-
 ## Query Clio
 Get the container's ip:
 
-`docker network inspect clio-net | grep -A3 clio_server | grep IPv4`
+`docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clio_server`
 
-    "IPv4Address": "10.0.0.2/16",
+    10.0.0.2
+
 
 Check the latest ledger:
 
