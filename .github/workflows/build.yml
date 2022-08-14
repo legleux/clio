@@ -43,6 +43,7 @@
 #           path: ${{ github.workspace }}/*.deb
 
 #       - name: Artifact clio_tests
+#         timeout-minutes: 30
 #         uses: actions/upload-artifact@v3
 #         with:
 #           name: clio_tests
