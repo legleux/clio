@@ -51,11 +51,11 @@ jobs:
               "IMAGE=clio"
           context: .
           load: true
-          tags: ${{ env.TEST_TAG }}:${{ steps.tag_name.outputs.sha_short }}
+          tags: ${{ env.TEST_TAG }}-${{ steps.tag_name.outputs.sha_short }}
       -
         name: Test
         run: |
-          docker run --rm ${{ env.TEST_TAG }}:${{ steps.tag_name.outputs.sha_short }}
+          docker run --rm ${{ env.TEST_TAG }}-${{ steps.tag_name.outputs.sha_short }}
 
       -
         name: Build and push
