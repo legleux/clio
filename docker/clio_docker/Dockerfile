@@ -10,7 +10,7 @@ RUN mkdir /usr/local/share/keyrings/ && \
 RUN echo "deb [signed-by=/usr/local/share/keyrings/ripple-key.gpg] https://repos.ripple.com/repos/rippled-deb-test-mirror focal stable" | \
     tee -a /etc/apt/sources.list.d/clio.list
 RUN apt-get update && apt-get install -y clio
-COPY docker-config.json "/opt/clio/etc/config.json"
+COPY config.json "/opt/clio/etc/config.json"
 
 COPY /entrypoint.sh /entrypoint.sh
 ENTRYPOINT [ "/entrypoint.sh" ]
