@@ -34,6 +34,7 @@ jobs:
       -
         name: Set up context
         run: |
+          docker --version
           docker context create buildx-build
           # docker context use buildx-build
           docker buildx create
