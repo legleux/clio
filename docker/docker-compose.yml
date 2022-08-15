@@ -3,12 +3,8 @@ services:
 
   clio:
     container_name: clio_server
-    image: clio
-    # command:
-    #   -   /opt/clio/etc/config.json"
+    image: clio_server
     build: clio_docker
-    # volumes:
-    #   - ./data/clio:/var/log/clio
     networks:
      clio-net:
        ipv4_address: 10.0.0.2
