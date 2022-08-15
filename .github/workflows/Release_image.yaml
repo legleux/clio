@@ -24,8 +24,8 @@ jobs:
 
       - name: Test
         run: |
-          docker build . -t testlegleux/${{ github.event.repository.name }}
-          docker tag testlegleux/${{ github.event.repository.name }} testlegleux/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }}
+          docker build . -t ${{ github.repository_owner }}/${{ github.event.repository.name }}
+          docker tag ${{ github.repository_owner }}/${{ github.event.repository.name }} ${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }}
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
@@ -35,14 +35,14 @@ jobs:
 
       - name: Push to dockerhub
         run: |
-          docker push testlegleux/${{ github.event.repository.name }}
+          docker push ${{ github.repository_owner }}/${{ github.event.repository.name }}
 
-          docker tag testlegleux/${{ github.event.repository.name }} testlegleux/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }}
-          docker push testlegleux/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }}
+          docker tag ${{ github.repository_owner }}/${{ github.event.repository.name }} ${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }}
+          docker push ${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }}
 
           if [[ "${{ steps.tag_name.outputs.BRANCH }}" == "main" ]];then
-            docker tag testlegleux/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }} testlegleux/${{ github.event.repository.name }}:latest
-            docker push testlegleux/${{ github.event.repository.name }}:latest
+            docker tag ${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }} ${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
+            docker push ${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
           fi
 
       - name: Login to GitHub Container Registry
@@ -54,5 +54,5 @@ jobs:
 
       - name: Push to ghcr
         run: |
-          docker tag testlegleux/${{ github.event.repository.name }}   ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+          docker tag ${{ github.repository_owner }}/${{ github.event.repository.name }}   ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
           docker push ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
