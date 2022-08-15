@@ -1,48 +1,58 @@
-name: Publish Docker image on Release
-
+name: Deploy docker images
 on:
   release:
     types: [published]
 
 jobs:
-  push_to_registries:
-    name: Push Docker image to multiple registries
-    runs-on: ubuntu-latest
-
-    permissions:
-      packages: write
-      contents: read
+  deploy_image:
+    runs-on: [self-hosted, Linux]
+    name: Build clio in docker
     steps:
-      - name: Check out the repo
+
+      - name: Get tag
+        run: |
+          SHA=${GITHUB_SHA::7}
+          echo "::set-output name=SHA_SHORT::${SHA}"
+          echo "::set-output name=BRANCH::${{ github.event.release.target_commitish}}" # this for on release
+          TAGNAME=clio:${SHA}
+          echo "::set-output name=TAGNAME::${TAGNAME}"
+
+        id: tag_name
+
+      - name: Checkout
         uses: actions/checkout@v3
 
-      -
-        name: Login to DockerHub
+      - name: Test
+        run: |
+          docker build . -t testlegleux/${{ github.event.repository.name }}
+          docker tag testlegleux/${{ github.event.repository.name }} testlegleux/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }}
+
+      - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_PW }}
 
-      -
-        name: Login to GitHub Container Registry
+      - name: Push to dockerhub
+        run: |
+          docker push testlegleux/${{ github.event.repository.name }}
+
+          docker tag testlegleux/${{ github.event.repository.name }} testlegleux/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }}
+          docker push testlegleux/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }}
+
+          if [[ "${{ steps.tag_name.outputs.BRANCH }}" == "main" ]];then
+            docker tag testlegleux/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }} testlegleux/${{ github.event.repository.name }}:latest
+            docker push testlegleux/${{ github.event.repository.name }}:latest
+          fi
+
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            testlegleux/{{ github.repository }}
-            ghcr.io/${{ github.repository }}
-
-      - name: Build and push Docker images
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      - name: Push to ghcr
+        run: |
+          docker tag testlegleux/${{ github.event.repository.name }}   ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+          docker push ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
