@@ -56,3 +56,19 @@ jobs:
         run: |
           docker tag ${{ github.repository_owner }}/${{ github.event.repository.name }}   ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
           docker push ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+
+## This creates "packages" in GitHub but requires an update to the docker version on self-hosted runners
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta
+      #   uses: docker/metadata-action@v2
+      #   with:
+      #     images: |
+      #       ghcr.io/${{ github.repository }}
+
+      # - name: Build and push Docker images
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: .
+      #     push: true
+      #     tags: ${{ steps.meta.outputs.tags }}
+      #     labels: ${{ steps.meta.outputs.labels }}
