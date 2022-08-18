@@ -100,7 +100,7 @@ jobs:
 
       - name: Test image
         run: |
-          docker build . -f Dockerfile.test -t ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}
+          docker build . -t ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}
           docker tag ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }} ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }}
           ## need to tag with repo name for ghcr.io
           docker tag ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }} ${{ github.repository_owner }}/${{ github.event.repository.name }}

@@ -35,20 +35,8 @@ jobs:
           path: clio_ci
           repository: 'XRPLF/clio-ci'
 
-      # - name: Build
-      #   uses: legleux/clio-gha/build@main
-
-      - name: fake build
-        run: |
-          sudo apt-get update && sudo apt-get install -y equivs
-          mkdir -p clio_ci/build/ && cd clio_ci/build
-          echo -en 'Package: fakeserver\nVersion: 1.2.3\nMaintainer: Mee <support@me.com>\nArchitecture: all\nDepends: all' > a.equivs
-          equivs-build a.equivs
-          echo -en 'Package: fake\nVersion: 6.5.4\nMaintainer: Mee <support@me.com>\nArchitecture: all\nDepends: butts' > b.equivs
-          equivs-build b.equivs
-          mv *.deb ${{ github.workspace }}
-          ls -lh
-          touch ${{ github.workspace }}/clio_tests
+      - name: Build
+        uses: legleux/clio-gha/build@main
 
       - name: Artifact packages
         uses: actions/upload-artifact@v3
@@ -67,12 +55,10 @@ jobs:
     runs-on: [self-hosted, Linux]
     needs: build_clio
     steps:
-      - name: fake tests
-        run: echo "tests passed!"
-      # - name: Get clio_tests artifact
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: clio_tests
+      - name: Get clio_tests artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: clio_tests
 
-      # - name: Run tests
-      #   uses: XRPLF/clio-gha/test@main
+      - name: Run tests
+        uses: XRPLF/clio-gha/test@main
