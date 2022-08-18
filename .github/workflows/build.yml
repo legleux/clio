@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:  [master, release, develop, develop-next]
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   lint:
@@ -19,6 +20,7 @@ jobs:
 
   build_clio:
     name: Build Clio
+    needs: lint
     runs-on: [self-hosted, Linux]
     steps:
 
@@ -34,7 +36,7 @@ jobs:
           repository: 'XRPLF/clio-ci'
 
       - name: Build
-        uses: XRPLF/clio-gha/build@main
+        uses: legleux/clio-gha/build@main
 
       - name: Artifact packages
         uses: actions/upload-artifact@v3
@@ -48,53 +50,12 @@ jobs:
           name: clio_tests
           path: clio_tests
 
-  sign:
-    name: Sign packages
-    needs: build_clio
-    runs-on: ubuntu-20.04
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop'
-    env:
-      GPG_KEY_B64: ${{ secrets.GPG_KEY_B64 }}
-      GPG_KEY_PASS_B64: ${{ secrets.GPG_KEY_PASS_B64 }}
-
-    steps:
-      - name: Get package artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: clio_packages
-
-      - name: find packages
-        run: find . -name "*.deb"
-
-      - name: Install dpkg-sig
-        run: |
-          sudo apt-get update && sudo apt-get install -y dpkg-sig
-
-      - name: Sign Debian packages
-        uses: XRPLF/clio-gha/sign@main
-
-      - name: Verify the signature
-        run: |
-          set -e
-          for PKG in $(ls *.deb); do
-            gpg --verify "${PKG}"
-          done
-
-      - name: Get short SHA
-        id: shortsha
-        run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
-
-      - name: Artifact Debian package
-        uses: actions/upload-artifact@v2
-        with:
-          name: clio-deb-packages-${{ steps.shortsha.outputs.sha8 }}
-          path: ${{ github.workspace }}/*.deb
-
   test_clio:
     name: Test Clio
     runs-on: [self-hosted, Linux]
     needs: build_clio
     steps:
+
       - name: Get clio_tests artifact
         uses: actions/download-artifact@v3
         with:
