@@ -81,5 +81,6 @@ jobs:
           files: "*.deb"
 
   publish_images:
+    needs: push
     name: Publish Docker images
     uses: ./.github/workflows/publish_images.yml
