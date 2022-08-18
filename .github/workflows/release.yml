@@ -83,7 +83,6 @@ jobs:
   publish_images:
     needs: push
     name: Publish Docker images
-    uses: ./.github/workflows/publish_images.yml
     runs-on: [self-hosted, Linux]
     steps:
       - name: Get tag
