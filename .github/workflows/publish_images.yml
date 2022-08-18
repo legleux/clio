@@ -1,15 +1,15 @@
-name: Deploy docker images
+name: Publish Docker images
+
 on:
-  release:
-    types: [published]
+  workflow_call:
 
 jobs:
-  deploy_image:
+  deploy_images:
+    name: Deploy Docker images
     runs-on: [self-hosted, Linux]
-    name: Build clio in docker
     steps:
-
       - name: Get tag
+        id: tag_name
         run: |
           SHA=${GITHUB_SHA::7}
           echo "::set-output name=SHA_SHORT::${SHA}"
@@ -17,30 +17,28 @@ jobs:
           TAGNAME=clio:${SHA}
           echo "::set-output name=TAGNAME::${TAGNAME}"
 
-        id: tag_name
-
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Test
+      - name: Test image
         run: |
           docker build . -t ${{ github.repository_owner }}/${{ github.event.repository.name }}
           docker tag ${{ github.repository_owner }}/${{ github.event.repository.name }} ${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }}
 
-      - name: Login to DockerHub
+      - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_PW }}
 
-      - name: Push to dockerhub
+      - name: Push to Docker Hub
         run: |
           docker push ${{ github.repository_owner }}/${{ github.event.repository.name }}
 
           docker tag ${{ github.repository_owner }}/${{ github.event.repository.name }} ${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }}
           docker push ${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }}
 
-          if [[ "${{ steps.tag_name.outputs.BRANCH }}" == "main" ]];then
+          if [[ "${{ steps.tag_name.outputs.BRANCH }}" == "master" ]];then
             docker tag ${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }} ${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
             docker push ${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
           fi

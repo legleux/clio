@@ -1,0 +1,85 @@
+name: Publish packages and Docker images
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
+
+  sign:
+    name: Sign packages
+    needs: build
+    runs-on: ubuntu-20.04
+    env:
+      GPG_KEY_B64: ${{ secrets.GPG_KEY_B64 }}
+      GPG_KEY_PASS_B64: ${{ secrets.GPG_KEY_PASS_B64 }}
+
+    steps:
+      - name: Get package artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: clio_packages
+
+      - name: find packages
+        run: find . -name "*.deb"
+
+      - name: Install dpkg-sig
+        run: |
+          sudo apt-get update && sudo apt-get install -y dpkg-sig
+
+      - name: Sign Debian packages
+        uses: XRPLF/clio-gha/sign@main
+
+      - name: Verify the signature
+        run: |
+          set -e
+          for PKG in $(ls *.deb); do
+            gpg --verify "${PKG}"
+          done
+
+      - name: Get short SHA
+        id: shortsha
+        run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
+
+      - name: Artifact Debian package
+        uses: actions/upload-artifact@v2
+        with:
+          name: clio-deb-packages
+          path: ${{ github.workspace }}/*.deb
+
+  push:
+    name: Push to releases page
+    needs:  sign
+    runs-on: ubuntu-20.04
+    environment:
+      name: publishToRelease
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # - name: Create Release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ github.ref }}
+      #     release_name: Release ${{ github.ref }}
+      #     draft: true
+      #     prerelease: false
+
+      - name: Get Clio packages
+        uses: actions/download-artifact@v3
+        with:
+          name: clio-deb-packages
+
+      - name: Add release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "*.deb"
+
+  publish_images:
+    name: Publish Docker images
+    uses: ./.github/workflows/publish_images.yml
