@@ -1,4 +1,5 @@
 name: Publish packages and Docker images
+description: Require a human to put the packages on GitHub's "Releases" pag and push Docker images to GCHR and Docker Hub
 on:
   release:
     types: [published]

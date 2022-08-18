@@ -1,0 +1,29 @@
+name: 'Test Docker image'
+description: 'Tests the Docker image can successfully build'
+inputs:
+  registry:
+    description: 'Registry of the image'
+    required: false
+    default: '${{ github.repository_owner }}'
+  repository:
+    description: 'Quote category to fetch'
+    required: true
+    default: '${{ github.event.repository.name }}'
+  tag:
+    description: 'Tag for Docker image'
+    default: "latest"
+    required: false
+  git-rev:
+    description: 'git rev the image is built from'
+    # default: "latest"
+    required: false
+    # possible values: git rev, develop, release, master, latest
+runs:
+  using: 'composite'
+  steps:
+    - name: Test image
+      shell: bash
+      run: |
+        TAG="${{{inputs.tag}}:-${{inputs.git-rev}}}"
+        docker build . -t ${{ inputs.repository }}/${{ inputs.repository }}
+        docker tag ${{ inputs.registry }}/${{ inputs.repository }} ${{ inputs.registry }}/${{ inputs.repository }}:${TAG}
