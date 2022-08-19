@@ -2,14 +2,25 @@ name: Publish packages and Docker images
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      pushImagesOnly:
+        description: 'Skip everything and only push images. Enter space separated branches to push'
+        required: true
+        default: 'false'
+      gitrev:
+        description: git rev to build image(s) for
+        required: false
 
 jobs:
   build:
     name: Build
+    if: github.event.inputs.pushImagesOnly == ''
     uses: ./.github/workflows/build.yml
 
   sign:
     name: Sign packages
+    if: github.event.inputs.pushImagesOnly == ''
     needs: build
     runs-on: ubuntu-20.04
     env:
@@ -25,23 +36,23 @@ jobs:
       - name: find packages
         run: find . -name "*.deb"
 
-      - name: Install dpkg-sig
-        run: |
-          sudo apt-get update && sudo apt-get install -y dpkg-sig
+      # - name: Install dpkg-sig
+      #   run: |
+      #     sudo apt-get update && sudo apt-get install -y dpkg-sig
 
-      - name: Sign Debian packages
-        uses: XRPLF/clio-gha/sign@main
+      # - name: Sign Debian packages
+      #   uses: XRPLF/clio-gha/sign@main
 
-      - name: Verify the signature
-        run: |
-          set -e
-          for PKG in $(ls *.deb); do
-            gpg --verify "${PKG}"
-          done
+      # - name: Verify the signature
+      #   run: |
+      #     set -e
+      #     for PKG in $(ls *.deb); do
+      #       gpg --verify "${PKG}"
+      #     done
 
-      - name: Get short SHA
-        id: shortsha
-        run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
+      # - name: Get short SHA
+      #   id: shortsha
+      #   run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
 
       - name: Artifact Debian package
         uses: actions/upload-artifact@v2
@@ -51,6 +62,7 @@ jobs:
 
   push:
     name: Push to releases page
+    if: github.event.inputs.pushImagesOnly == ''
     needs:  sign
     runs-on: ubuntu-20.04
     environment:
@@ -70,18 +82,18 @@ jobs:
       #     draft: true
       #     prerelease: false
 
-      - name: Get Clio packages
-        uses: actions/download-artifact@v3
-        with:
-          name: clio-deb-packages
+      # - name: Get Clio packages
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: clio-deb-packages
 
-      - name: Add release assets
-        uses: softprops/action-gh-release@v1
-        with:
-          files: "*.deb"
+      # - name: Add release assets
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     files: "*.deb"
 
   publish_images:
-    needs: push
+
     name: Publish Docker images
     runs-on: [self-hosted, Linux]
     steps:
@@ -89,7 +101,12 @@ jobs:
         id: tag_name
         run: |
           echo "::set-output name=DOCKER_REPO::rippleci"
-          SHA=${GITHUB_SHA::7}
+
+          if [ "${{ github.event.inputs.pushImagesOnly }}" != '' ];then
+            SHA=${{ github.event.inputs.gitrev }}
+          else
+            SHA=${GITHUB_SHA::7}
+          fi
           echo "::set-output name=SHA_SHORT::${SHA}"
           echo "::set-output name=BRANCH::${{ github.event.release.target_commitish}}" # this for on release
           TAGNAME=clio:${SHA}
@@ -100,9 +117,9 @@ jobs:
 
       - name: Test image builds
         run: |
-          docker build . -t ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }}
-          docker tag ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }} ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }}
-          ## need to tag with repo name for ghcr.io
+          echo "RUN echo ${{ steps.tag_name.outputs.SHA_SHORT }}" >> Dockerfile.test
+          docker build . -f Dockerfile.test -t ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }}
+          ## ghcr.io needs tag with repo name
           docker tag ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }} ${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }}
 
       - name: Login to Docker Hub
@@ -114,14 +131,20 @@ jobs:
       - name: Push to Docker Hub
         run: |
           docker push ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }}
-
-          docker tag ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }} ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }}
-          docker push ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }}
-
-          if [[ "${{ steps.tag_name.outputs.BRANCH }}" == "master" ]];then
-            docker tag ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }} ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:latest
-            docker push ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:latest
+          if [ -z "${{ github.event.inputs.pushImagesOnly }}" ];then
+            BRANCHES=${{ steps.tag_name.outputs.BRANCH }}
+          else
+            BRANCHES="${{ github.event.inputs.pushImagesOnly }}"
           fi
+          for BRANCH in ${BRANCHES};do
+            docker tag ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.SHA_SHORT }} ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }}
+            docker push ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }}
+
+            if [[ "${{ steps.tag_name.outputs.BRANCH }}" == "master" ]];then
+              docker tag ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:${{ steps.tag_name.outputs.BRANCH }} ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:latest
+              docker push ${{ steps.tag_name.outputs.DOCKER_REPO }}/${{ github.event.repository.name }}:latest
+            fi
+          done
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
