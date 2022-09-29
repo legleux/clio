@@ -8,23 +8,6 @@ i.e. `docker run --network=host -v $PWD/<config dir>:/opt/clio/etc clio_server`
 
 Run `docker compose up` in this directory to quickly get a Clio instance running quickly with rippled and cassandra.
 This will create a docker network where the services can all connect to each other.
-## Query Clio
-Get the container's ip:
-
-`docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clio_server`
-
-    10.0.0.2
-
-
-Check the latest ledger:
-
-`curl -s -X POST 10.0.0.2:8080 -d'{"method":"server_info"}' | jq '.result.info.cache'`
-
-    {
-    "size": 8155257,
-    "is_full": true,
-    "latest_ledger_seq": 30222329
-    }
 
 ## Query rippled state
 
@@ -67,3 +50,21 @@ When Clio finally is synced with rippled    :
         True | 30207972
 
     (2 rows)
+
+## Query Clio
+Get the container's ip:
+
+`docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' clio_server`
+
+    10.0.0.2
+
+
+Check the latest ledger:
+
+`curl -s -X POST 10.0.0.2:8080 -d'{"method":"server_info"}' | jq '.result.info.cache'`
+
+    {
+    "size": 8155257,
+    "is_full": true,
+    "latest_ledger_seq": 30222329
+    }
