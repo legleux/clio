@@ -7,7 +7,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=@CLIO_INSTALL_DIR@/bin/clio_server @CLIO_INSTALL_DIR@/etc/config.json
+ExecStart=@CLIO_INSTALL_DIR@/bin/clio_server --conf @CLIO_INSTALL_DIR@/etc/config.json
 Restart=on-failure
 User=clio
 Group=clio
