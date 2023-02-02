@@ -64,11 +64,11 @@ jobs:
           name: clio_${{ matrix.type.suffix }}_packages
           path: ${{ github.workspace }}/*.${{ matrix.type.suffix }}
 
-      - name: Artifact clio_tests
-        uses: actions/upload-artifact@v3
-        with:
-          name: clio_tests-${{ matrix.type.suffix }}
-          path: ${{ github.workspace }}/clio_tests
+      # - name: Artifact clio_tests
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: clio_tests-${{ matrix.type.suffix }}
+      #     path: ${{ github.workspace }}/clio_tests
 
   # build_dev:
   #   name: ${{ matrix.os.name }} test
