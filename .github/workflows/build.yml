@@ -55,7 +55,6 @@ jobs:
           fi
           cmake -S clio-packages -B clio-packages/build -DCLIO_ROOT=$CLIO_ROOT
           cmake --build clio-packages/build --parallel $(nproc)
-          cp ./clio-packages/build/clio-prefix/src/clio-build/clio_tests .
           mv ./clio-packages/build/*.${{ matrix.type.suffix }} .
 
       - name: Artifact packages
