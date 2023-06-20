@@ -1,33 +1,38 @@
-#[===================================================================[
-   write version to source
-#]===================================================================]
+execute_process(COMMAND git rev-parse --short HEAD
+                OUTPUT_VARIABLE GIT_REV
+                ERROR_QUIET)
 
-find_package(Git REQUIRED)
-
-set(GIT_COMMAND rev-parse --short HEAD)
-execute_process(COMMAND ${GIT_EXECUTABLE} ${GIT_COMMAND} OUTPUT_VARIABLE REV OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-set(GIT_COMMAND branch --show-current)
-execute_process(COMMAND ${GIT_EXECUTABLE} ${GIT_COMMAND} OUTPUT_VARIABLE BRANCH OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-if(BRANCH STREQUAL "")
-  set(BRANCH "dev")
-endif()
-
-if(NOT (BRANCH MATCHES master OR BRANCH MATCHES release/*)) # for develop and any other branch name YYYYMMDDHMS-<branch>-<git-ref>
-  execute_process(COMMAND date +%Y%m%d%H%M%S OUTPUT_VARIABLE DATE OUTPUT_STRIP_TRAILING_WHITESPACE)
-  set(VERSION "${DATE}-${BRANCH}-${REV}")
-else()
-  set(GIT_COMMAND describe --tags)
-  execute_process(COMMAND ${GIT_EXECUTABLE} ${GIT_COMMAND} OUTPUT_VARIABLE TAG_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
-  set(VERSION "${TAG_VERSION}-${REV}")
+if(NOT (BRANCH MATCHES "master" OR BRANCH MATCHES "release/*" OR BRANCH MATCHES "main")) # for develop and any other branch name YYYYMMDDHMS-<branch>-<git-ref>
+    execute_process(COMMAND date +%Y%m%d%H%M%S OUTPUT_VARIABLE DATE OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-  set(VERSION "${VERSION}+DEBUG")
+  set(DEBUG "+DEBUG")
+  set_target_properties(${exe_name} PROPERTIES OUTPUT_NAME  ${exe_name}-debug)
 endif()
 
-message(STATUS "Build version: ${VERSION}")
-set(clio_version "${VERSION}")
+if ("${GIT_REV}" STREQUAL "")
+    set(VERSION "${DATE}-development")
+    return()
+else()
+    execute_process(
+        COMMAND git describe --exact-match --tags
+        OUTPUT_VARIABLE TAG ERROR_QUIET)
+    execute_process(
+        COMMAND git rev-parse --abbrev-ref HEAD
+        OUTPUT_VARIABLE BRANCH)
+
+    string(STRIP "${GIT_REV}" GIT_REV)
+    string(STRIP "${TAG}" TAG)
+    string(STRIP "${BRANCH}" BRANCH)
+endif()
+
+if(NOT (BRANCH MATCHES "master" OR BRANCH MATCHES "release/*" OR BRANCH MATCHES "main"))
+    set(VERSION "${DATE}-${BRANCH}-${GIT_REV}${DEBUG}")
+else()
+    set(VERSION "${TAG}${DEBUG}")
+endif()
+
+set(clio_version ${VERSION})
 
 configure_file(CMake/Build.cpp.in ${CMAKE_SOURCE_DIR}/src/main/impl/Build.cpp)
