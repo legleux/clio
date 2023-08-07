@@ -74,10 +74,6 @@ jobs:
       - name: Checkout Clio source
         uses: actions/checkout@v3
 
-      # - name: Add remote
-      #   run: |
-      #     # add remote
-
-      - name: Build
+      - name: Conan install pkgs
         run: |
-          ./build.sh
+          ./.github/actions/build_linux/build_clio.sh
