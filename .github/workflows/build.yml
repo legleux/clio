@@ -80,7 +80,7 @@ jobs:
 
       - name: Conan install pkgs
         run: |
-          docker run --rm -it -v $PWD:/home/conan/clio --entrypoint bash conanio/gcc11:1.60.2
+          docker run --rm -it -v $PWD/clio:/home/conan/clio --entrypoint bash conanio/gcc11:1.60.2
           conan profile update settings.compiler.cppstd=20 default
           conan profile update settings.compiler.libcxx=libstdc++11 default
           conan export external/cassandra
