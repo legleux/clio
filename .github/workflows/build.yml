@@ -6,9 +6,9 @@ on:
     branches: [master, release/*, develop, develop-next]
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: clio
+# defaults:
+#   run:
+#     working-directory: clio
 
 jobs:
 #   lint:
