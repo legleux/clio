@@ -6,56 +6,85 @@ on:
     branches: [master, release/*, develop, develop-next]
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: clio
+
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Run clang-format
-        uses: ./.github/actions/lint
+#   lint:
+#     name: Lint
+#     runs-on: ubuntu-20.04
+#     steps:
+#       - uses: actions/checkout@v3
+#       - name: Run clang-format
+#         uses: ./.github/actions/lint
 
-  build_dev:
-    name: Build on Mac/Clang14 and run tests
+  # build_dev:
+  #   name: Build on Mac/Clang14 and run tests
+  #   continue-on-error: false
+  #   runs-on: [self-hosted, macOS]
+  #   needs: lint
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         path: clio
+
+  #     - name: List conan artifactory
+  #       run: |
+  #         conan search
+  #         conan remote list
+  #         if [[ $(conan remote list |grep conan-non-prod| wc -c) -ne 0 ]]; then
+  #             echo "conan-non-prod is available"
+  #         else
+  #             echo "adding conan-non-prod"
+  #             conan remote add conan-non-prod http://18.143.149.228:8081/artifactory/api/conan/conan-non-prod
+  #         fi
+
+  #     - name: Install dependencies
+  #       run: |
+  #         brew install llvm@14 pkg-config ninja bison cmake
+
+  #     - name: Setup environment for llvm-14
+  #       run: |
+  #         export PATH="/usr/local/opt/llvm@14/bin:$PATH"
+  #         export LDFLAGS="-L/usr/local/opt/llvm@14/lib -L/usr/local/opt/llvm@14/lib/c++ -Wl,-rpath,/usr/local/opt/llvm@14/lib/c++"
+  #         export CPPFLAGS="-I/usr/local/opt/llvm@14/include"
+
+  #     - name: Build Clio
+  #       run: |
+  #         cd clio
+  #         mkdir -p build
+  #         cd build
+  #         conan install .. -of . -b missing -s build_type=Release -o clio:tests=True
+  #         cmake -DCMAKE_TOOLCHAIN_FILE:FILEPATH=build/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release ..
+  #         cmake --build . -j4
+
+  #     - name: Run Test
+  #       run: |
+  #         cd clio/build
+  #         ./clio_tests --gtest_filter="-BackendCassandraBaseTest*:BackendCassandraTest*:BackendCassandraFactoryTestWithDB*"
+
+  build:
+    name: Build on Linux
     continue-on-error: false
-    runs-on: [self-hosted, macOS]
-    needs: lint
+    runs-on: [self-hosted, enlil]
+    # needs: lint
+
     steps:
-      - uses: actions/checkout@v3
-        with:
-          path: clio
+      - name: Checkout Clio source
+        uses: actions/checkout@v3
 
-      - name: List conan artifactory
-        run: |
-          conan search
-          conan remote list
-          if [[ $(conan remote list |grep conan-non-prod| wc -c) -ne 0 ]]; then
-              echo "conan-non-prod is available"
-          else
-              echo "adding conan-non-prod"
-              conan remote add conan-non-prod http://18.143.149.228:8081/artifactory/api/conan/conan-non-prod
-          fi
+      # - name: Add remote
+      #   run: |
+      #     # add remote
 
-      - name: Install dependencies
+      - name: Conan install pkgs
         run: |
-          brew install llvm@14 pkg-config ninja bison cmake
-
-      - name: Setup environment for llvm-14
-        run: |
-          export PATH="/usr/local/opt/llvm@14/bin:$PATH"
-          export LDFLAGS="-L/usr/local/opt/llvm@14/lib -L/usr/local/opt/llvm@14/lib/c++ -Wl,-rpath,/usr/local/opt/llvm@14/lib/c++"
-          export CPPFLAGS="-I/usr/local/opt/llvm@14/include"
-
-      - name: Build Clio
-        run: |
-          cd clio
-          mkdir -p build
-          cd build
-          conan install .. -of . -b missing -s build_type=Release -o clio:tests=True
-          cmake -DCMAKE_TOOLCHAIN_FILE:FILEPATH=build/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release ..
-          cmake --build . -j4
-
-      - name: Run Test
-        run: |
-          cd clio/build
-          ./clio_tests --gtest_filter="-BackendCassandraBaseTest*:BackendCassandraTest*:BackendCassandraFactoryTestWithDB*"
+          docker run --rm -it -v $PWD:/home/conan/clio --entrypoint bash conanio/gcc11:1.60.2
+          conan profile update settings.compiler.cppstd=20 default
+          conan profile update settings.compiler.libcxx=libstdc++11 default
+          conan export external/cassandra
+          conan remote add --insert 0 conan-non-prod http://18.143.149.228:8081/artifactory/api/conan/conan-non-prod
+          conan install . -if build -of build  --build missing  --settings build_type=Release  -o tests=True
+          cmake -DCMAKE_TOOLCHAIN_FILE:FILEPATH=build/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -B build
+          cmake --build build --parallel $(($(nproc) - 2))
