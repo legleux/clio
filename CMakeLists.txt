@@ -263,5 +263,5 @@ endif ()
 
 include (CMake/install/install.cmake)
 if (packaging)
-  include (CMake/packaging.cmake) # This file exists only in build runner
+include (CMake/packaging/packaging.cmake) # This file exists only in build runner
 endif ()

@@ -1,3 +1,4 @@
+include(GNUInstallDirs)
 set (CLIO_INSTALL_DIR "/opt/clio")
 set (CMAKE_INSTALL_PREFIX ${CLIO_INSTALL_DIR})
 
@@ -10,5 +11,8 @@ install (FILES ${CMAKE_BINARY_DIR}/install-config.json DESTINATION etc RENAME co
 
 configure_file ("${CMAKE_SOURCE_DIR}/CMake/install/clio.service.in" "${CMAKE_BINARY_DIR}/clio.service")
 
+# only if systemd?
 install (FILES "${CMAKE_BINARY_DIR}/clio.service" DESTINATION /lib/systemd/system)
 
+# only if install_prefix is usr/local?
+file(CREATE_LINK ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/clio_server /usr/local/bin/clio_server SYMBOLIC)
