@@ -11,7 +11,7 @@ class Clio(ConanFile):
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {
         'fPIC': [True, False],
-        'verbose': [True, False],   
+        'verbose': [True, False],
         'tests': [True, False],     # build unit tests; create `clio_tests` binary
         'docs': [True, False],      # doxygen API docs; create custom target 'docs'
         'packaging': [True, False], # create distribution packages
@@ -26,6 +26,7 @@ class Clio(ConanFile):
         'grpc/1.50.1',
         'openssl/1.1.1u',
         'xrpl/2.0.0-b2',
+        'zlib/1.2.13'
     ]
 
     default_options = {
@@ -36,8 +37,8 @@ class Clio(ConanFile):
         'coverage': False,
         'lint': False,
         'docs': False,
-        
         'xrpl/*:tests': False,
+        'xrpl/*:with_rocksdb': False,
         'cassandra-cpp-driver/*:shared': False,
         'date/*:header_only': True,
         'grpc/*:shared': False,
@@ -65,7 +66,7 @@ class Clio(ConanFile):
 
     def layout(self):
         cmake_layout(self)
-        # Fix this setting to follow the default introduced in Conan 1.48 
+        # Fix this setting to follow the default introduced in Conan 1.48
         # to align with our build instructions.
         self.folders.generators = 'build/generators'
 
