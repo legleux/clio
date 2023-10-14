@@ -7,4 +7,4 @@ runs:
     - name: pkg Clio
       shell: bash
       run: |
-        ./.github/actions/package_clio/build_package
+        ./.github/actions/package_clio/build_package.sh
