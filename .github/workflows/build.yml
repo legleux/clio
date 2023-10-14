@@ -134,6 +134,7 @@ jobs:
     runs-on: [self-hosted, Linux]
     container:
       image: legleux/rippled-builder:10-06-23
+      options: --user root
     env:
       PKG: deb
     steps:
@@ -166,6 +167,7 @@ jobs:
     runs-on: [self-hosted, Linux]
     container:
       image: legleux/rippled-builder:10-06-23
+      options: --user root
     env:
       PKG: rpm
     steps:
