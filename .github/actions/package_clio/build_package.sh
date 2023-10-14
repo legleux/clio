@@ -7,7 +7,7 @@ then
     pip install "conan<2"
 fi
 
-SRC_DIR=/clio
+SRC_DIR=clio
 BUILD_DIR="${SRC_DIR}/build"
 BUILD_CONFIG=Release
 TESTS=False
