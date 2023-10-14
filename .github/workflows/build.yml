@@ -1,19 +1,19 @@
 name: Build Clio
 on:
   push:
-    branches: [master, release/*, develop]
+    branches: [master, release/*, develop, new-packaging]
   pull_request:
     branches: [master, release/*, develop]
   workflow_dispatch:
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Run clang-format
-        uses: ./.github/actions/clang_format
+  # lint:
+  #   name: Lint
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Run clang-format
+  #       uses: ./.github/actions/clang_format
 
   # build_mac:
   #   name: Build macOS
@@ -23,48 +23,48 @@ jobs:
   #     CCACHE_DIR: ${{ github.workspace }}/.ccache
   #     CONAN_USER_HOME: ${{ github.workspace }}
   #   steps:
-      - uses: actions/checkout@v3
-        with:
-            fetch-depth: 0
+      # - uses: actions/checkout@v3
+      #   with:
+      #       fetch-depth: 0
 
-      - name: Install packages
-        run: |
-          brew install llvm@14 pkg-config ninja bison cmake ccache jq
+      # - name: Install packages
+      #   run: |
+      #     brew install llvm@14 pkg-config ninja bison cmake ccache jq
 
-      - name: Setup conan
-        uses: ./.github/actions/setup_conan
-        id: conan
+      # - name: Setup conan
+      #   uses: ./.github/actions/setup_conan
+      #   id: conan
 
-      - name: Restore cache
-        uses: ./.github/actions/restore_cache
-        id: restore_cache
-        with:
-          conan_dir: ${{ env.CONAN_USER_HOME }}/.conan
-          ccache_dir: ${{ env.CCACHE_DIR }}
+      # - name: Restore cache
+      #   uses: ./.github/actions/restore_cache
+      #   id: restore_cache
+      #   with:
+      #     conan_dir: ${{ env.CONAN_USER_HOME }}/.conan
+      #     ccache_dir: ${{ env.CCACHE_DIR }}
 
-      - name: Build Clio
-        uses: ./.github/actions/build_clio
-        with:
-          conan_profile: ${{ steps.conan.outputs.conan_profile }}
-          conan_cache_hit: ${{ steps.restore_cache.outputs.conan_cache_hit }}
+      # - name: Build Clio
+      #   uses: ./.github/actions/build_clio
+      #   with:
+      #     conan_profile: ${{ steps.conan.outputs.conan_profile }}
+      #     conan_cache_hit: ${{ steps.restore_cache.outputs.conan_cache_hit }}
 
-      - name: Strip tests
-        run: strip build/clio_tests
+      # - name: Strip tests
+      #   run: strip build/clio_tests
 
-      - name: Upload clio_tests
-        uses: actions/upload-artifact@v3
-        with:
-          name: clio_tests_mac
-          path: build/clio_tests
+      # - name: Upload clio_tests
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: clio_tests_mac
+      #     path: build/clio_tests
 
-      - name: Save cache
-        uses: ./.github/actions/save_cache
-        with:
-          conan_dir: ${{ env.CONAN_USER_HOME }}/.conan
-          conan_hash: ${{ steps.restore_cache.outputs.conan_hash }}
-          conan_cache_hit: ${{ steps.restore_cache.outputs.conan_cache_hit }}
-          ccache_dir: ${{ env.CCACHE_DIR }}
-          ccache_cache_hit: ${{ steps.restore_cache.outputs.ccache_cache_hit }}
+      # - name: Save cache
+      #   uses: ./.github/actions/save_cache
+      #   with:
+      #     conan_dir: ${{ env.CONAN_USER_HOME }}/.conan
+      #     conan_hash: ${{ steps.restore_cache.outputs.conan_hash }}
+      #     conan_cache_hit: ${{ steps.restore_cache.outputs.conan_cache_hit }}
+      #     ccache_dir: ${{ env.CCACHE_DIR }}
+      #     ccache_cache_hit: ${{ steps.restore_cache.outputs.ccache_cache_hit }}
 
   # build_linux:
   #   name: Build linux
