@@ -1,3 +1,7 @@
+#!/usr/bin/bash
+
+set -ex
+
 source /opt/rh/devtoolset-11/enable
 source /opt/rh/rh-python38/enable
 

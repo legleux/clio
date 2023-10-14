@@ -159,41 +159,46 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: ./.github/actions/package_clio
-        name: build_rpm_package
-
-  build_rpm_package:
-    name: Build rpm packages
-    runs-on: [self-hosted, Linux]
-    container:
-      image: legleux/rippled-builder:10-06-23
-      options: --user root
-    env:
-      PKG: rpm
-    steps:
-      - name: Download Git source and build
-        shell: bash
+      - name: Check git
         run: |
-          ulimit -n 1024000 && yum -y update
-          source /opt/rh/devtoolset-11/enable
-          yum install -y curl-devel expat-devel gettext-devel openssl-devel zlib-devel perl-CPAN perl-devel
-          cd /tmp/ && mkdir git && cd git
-          wget https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.42.0.tar.gz
-          tar -xvf git-2.42.0.tar.gz # --strip-components=1 # ?
-          cd git-2.42.0
-          make configure
-          ./configure --prefix=/usr/local
-          make -j $(nproc)
-          make install
-          git --version
+          git config --global --add safe.directory $PWD
+          echo $(git tag --points-at HEAD)
 
-      - name: Get Clio
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+      - name: Build rpm package
+        uses: ./.github/actions/package_clio
 
-      - uses: ./.github/actions/package_clio
-        name: build_rpm_package
+  # build_rpm_package:
+  #   name: Build rpm packages
+  #   runs-on: [self-hosted, Linux]
+  #   container:
+  #     image: legleux/rippled-builder:10-06-23
+  #     options: --user root
+  #   env:
+  #     PKG: rpm
+  #   steps:
+  #     - name: Download Git source and build
+  #       shell: bash
+  #       run: |
+  #         ulimit -n 1024000 && yum -y update
+  #         source /opt/rh/devtoolset-11/enable
+  #         yum install -y curl-devel expat-devel gettext-devel openssl-devel zlib-devel perl-CPAN perl-devel
+  #         cd /tmp/ && mkdir git && cd git
+  #         wget https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.42.0.tar.gz
+  #         tar -xvf git-2.42.0.tar.gz # --strip-components=1 # ?
+  #         cd git-2.42.0
+  #         make configure
+  #         ./configure --prefix=/usr/local
+  #         make -j $(nproc)
+  #         make install
+  #         git --version
+
+  #     - name: Get Clio
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+
+  #     - uses: ./.github/actions/package_clio
+  #       name: build_rpm_package
 
   # build_rpm_package:
   #   runs-on: [self-hosted, Linux]
