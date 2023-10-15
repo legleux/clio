@@ -33,16 +33,16 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
   set (VERSION "${VERSION}+DEBUG")
 endif ()
 
-if(DEFINED PKG)
-  set (GIT_COMMAND tag --points-at HEAD)
-  execute_process (COMMAND ${GIT_EXECUTABLE} ${GIT_COMMAND}
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      OUTPUT_VARIABLE VERSION
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
+# if(DEFINED PKG)
+#   set (GIT_COMMAND tag --points-at HEAD)
+#   execute_process (COMMAND ${GIT_EXECUTABLE} ${GIT_COMMAND}
+#       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+#       OUTPUT_VARIABLE VERSION
+#       OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  string(REPLACE "\n" ";" VERSION ${VERSION})
-  list(GET VERSION -1 VERSION)
-endif()
+#   string(REPLACE "\n" ";" VERSION ${VERSION})
+#   list(GET VERSION -1 VERSION)
+# endif()
 
 set (clio_version "${VERSION}")
 
