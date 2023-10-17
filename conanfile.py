@@ -26,6 +26,7 @@ class Clio(ConanFile):
         'grpc/1.50.1',
         'openssl/1.1.1u',
         'xrpl/2.0.0-b2',
+
     ]
 
     default_options = {
@@ -36,7 +37,7 @@ class Clio(ConanFile):
         'coverage': False,
         'lint': False,
         'docs': False,
-        
+        'xrpl/*:rocksdb': False,
         'xrpl/*:tests': False,
         'cassandra-cpp-driver/*:shared': False,
         'date/*:header_only': True,
@@ -65,7 +66,7 @@ class Clio(ConanFile):
 
     def layout(self):
         cmake_layout(self)
-        # Fix this setting to follow the default introduced in Conan 1.48 
+        # Fix this setting to follow the default introduced in Conan 1.48
         # to align with our build instructions.
         self.folders.generators = 'build/generators'
 

@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  clio:
+    container_name: clio
+    image: clio:test
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    network_mode: host
+    volumes:
+      # - <directory_with_your_config.json>:/etc/opt/clio
+      # e.g.
+      - ../cfg:/etc/opt/clio
+    command:
+      /opt/clio/bin/clio_server --conf /etc/opt/clio/config.json
+
+  cassandra:
+    image: cassandra:4.0.4
+    container_name: cassandra
+    network_mode: host
