@@ -26,9 +26,9 @@ services:
     volumes:
       # - <directory_with_your_config.json>:/etc/opt/clio
       # e.g.
-      - ../cfg:/etc/opt/clio
+      - ./cfg:/etc/opt/clio
     command:
-      /opt/clio/bin/clio_server --conf /etc/opt/clio/config.json
+      /opt/clio/bin/clio_server --conf /etc/opt/clio/clio_config.json
     depends_on:
       rippled:
         condition: service_healthy
