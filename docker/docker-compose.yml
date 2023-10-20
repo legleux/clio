@@ -1,6 +1,21 @@
 version: "3"
 
 services:
+  rippled:
+    image: rippleci/rippled:2.0.0-b3
+    network_mode: host
+    volumes:
+      - ./rippled_config/devnet/:/opt/ripple/etc
+      - .:/script
+    command: ["/opt/ripple/bin/rippled", "--conf", "/opt/ripple/etc/rippled.cfg"]
+    healthcheck:
+      test: ["CMD", "/script/check.sh"]
+      interval: 30s
+      timeout: 15m
+      retries: 5
+      start_period: 90s
+      #start_interval: 10s
+
   clio:
     container_name: clio
     image: clio:test
@@ -14,6 +29,9 @@ services:
       - ../cfg:/etc/opt/clio
     command:
       /opt/clio/bin/clio_server --conf /etc/opt/clio/config.json
+    depends_on:
+      rippled:
+        condition: service_healthy
 
   cassandra:
     image: cassandra:4.0.4
