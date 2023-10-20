@@ -21,7 +21,7 @@ conan install . \
     --settings build_type=${BUILD_CONFIG}
 
 cmake . -B ${BUILD_DIR}    \
-    -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${BUILD_DIR}/build/generators/conan_toolchain.cmake     \
+    -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${BUILD_DIR}/build/generators/conan_toolchain.cmake \
     -DCMAKE_BUILD_TYPE=${BUILD_CONFIG}
 
 cmake --build ${BUILD_DIR} --target install/strip --parallel $NPROC

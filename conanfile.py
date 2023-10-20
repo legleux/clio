@@ -11,7 +11,7 @@ class Clio(ConanFile):
     settings = 'os', 'compiler', 'build_type', 'arch'
     options = {
         'fPIC': [True, False],
-        'verbose': [True, False],   
+        'verbose': [True, False],
         'tests': [True, False],     # build unit tests; create `clio_tests` binary
         'docs': [True, False],      # doxygen API docs; create custom target 'docs'
         'packaging': [True, False], # create distribution packages
