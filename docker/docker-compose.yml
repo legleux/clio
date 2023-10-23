@@ -6,26 +6,25 @@ services:
     network_mode: host
     volumes:
       - ./rippled_config/devnet/:/opt/ripple/etc
-      - .:/script
+      - .:/check/
     command: ["/opt/ripple/bin/rippled", "--conf", "/opt/ripple/etc/rippled.cfg"]
     healthcheck:
-      test: ["CMD", "/script/check.sh"]
+      test: ["CMD", "/check/check_sync.sh"]
       interval: 30s
       timeout: 15m
       retries: 5
       start_period: 90s
-      #start_interval: 10s
 
   clio:
     container_name: clio
-    image: clio:test
+    image: clio:${CLIO_GIT_REF}
     build:
       context: ..
       dockerfile: docker/Dockerfile
     network_mode: host
     volumes:
       # - <directory_with_your_config.json>:/etc/opt/clio
-      # e.g.
+      # e.g. with included devnet config
       - ./cfg:/etc/opt/clio
     command:
       /opt/clio/bin/clio_server --conf /etc/opt/clio/clio_config.json

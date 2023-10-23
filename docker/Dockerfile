@@ -18,5 +18,5 @@ COPY docker/build_clio.sh /tmp/build_clio.sh
 WORKDIR /clio
 RUN /tmp/build_clio.sh
 
-FROM centos:7 as clio
+FROM debian:11-slim as clio
 COPY --from=build_clio /opt/clio /opt/clio
