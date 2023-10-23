@@ -11,7 +11,7 @@ services:
     healthcheck:
       test: ["CMD", "/check/check_sync.sh"]
       interval: 30s
-      timeout: 15m
+      timeout: 20m
       retries: 5
       start_period: 90s
 
