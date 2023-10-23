@@ -17,7 +17,7 @@ services:
 
   clio:
     container_name: clio
-    image: clio:${CLIO_GIT_REF}
+    image: rippleci/clio:1ad3918
     build:
       context: ..
       dockerfile: docker/Dockerfile
