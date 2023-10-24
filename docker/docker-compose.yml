@@ -31,8 +31,16 @@ services:
     depends_on:
       rippled:
         condition: service_healthy
+      cassandra:
+        condition: service_healthy
 
   cassandra:
     image: cassandra:4.0.4
     container_name: cassandra
     network_mode: host
+    healthcheck:
+      test: ["CMD", "/opt/cassandra/bin/cqlsh", "-e", "SHOW VERSION"]
+      interval: 20s
+      timeout: 5m
+      retries: 5
+      start_period: 2m
