@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  rippled:
+    image: rippleci/rippled:2.0.0-b3
+    network_mode: host
+    volumes:
+      - ./rippled_config/devnet/:/opt/ripple/etc
+      - .:/check/
+    command: ["/opt/ripple/bin/rippled", "--conf", "/opt/ripple/etc/rippled.cfg"]
+    healthcheck:
+      test: ["CMD", "/check/check_sync.sh"]
+      interval: 60s
+      timeout: 20m
+      retries: 5
+      start_period: 90s
+
+  clio:
+    container_name: clio
+    image: rippleci/clio:1ad3918
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    network_mode: host
+    volumes:
+      # - <directory_with_your_config.json>:/etc/opt/clio
+      # e.g. with included devnet config
+      - ./cfg:/etc/opt/clio
+    command:
+      /opt/clio/bin/clio_server --conf /etc/opt/clio/clio_config.json
+    depends_on:
+      rippled:
+        condition: service_healthy
+      cassandra:
+        condition: service_healthy
+
+  cassandra:
+    image: cassandra:4.0.4
+    container_name: cassandra
+    network_mode: host
+    healthcheck:
+      test: ["CMD", "/opt/cassandra/bin/cqlsh", "-e", "SHOW VERSION"]
+      interval: 20s
+      timeout: 5m
+      retries: 5
+      start_period: 2m
