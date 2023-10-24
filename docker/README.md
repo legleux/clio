@@ -1,9 +1,3 @@
-Build the docker images from the root of the repo with `./docker/build_image.sh`
-
-\- or -
-
-Have a `rippled` running locally.
-
 Edit `docker/docker-compose.yml` with a volume containing your `config.json` for Clio.
 
 From root of repo, `docker compose -f docker/docker-compose.yml`
