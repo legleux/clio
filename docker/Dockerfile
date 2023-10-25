@@ -20,3 +20,4 @@ RUN /tmp/build_clio.sh
 
 FROM debian:11-slim as clio
 COPY --from=build_clio /opt/clio /opt/clio
+COPY test.sh /test.sh
