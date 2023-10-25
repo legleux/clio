@@ -65,6 +65,9 @@ jobs:
       - name: Test building image
         run: |
           IMAGE=${{ steps.tag_name.outputs.BASE_IMAGE_NAME }}
-          git config --global --add safe.directory $PWD/clio
+          echo "PWD: $PWD"
+          echo "ls -l"
+          ls -l
+          git config --global --add safe.directory /home/emel/dev/actions-runner/_work/clio/clio
           ./docker/build_image.sh ${IMAGE}
           docker run --rm ${IMAGE} /test.sh
