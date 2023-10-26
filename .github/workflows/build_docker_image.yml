@@ -1,0 +1,104 @@
+name: Deploy docker images
+on:
+  push:
+    branches:
+      - "*"
+  # release:
+  #   types: [published]
+  # Should kick off on PR merges also
+
+jobs:
+  deploy_image:
+    runs-on: [self-hosted, Linux]
+    name: Build Clio in docker
+    env:
+      # The repo on Docker Hub the image will get pushed to. GHCR will be set by repo owner
+      DOCKERHUB_REPO: legleux
+      # The branch that will be used to tag an image with "latest"
+      LATEST_BRANCH: main
+      IMAGE_NAME: ${{ github.event.repository.name }} # repo name in ghcr? probably should be the same
+
+    steps:
+      - name: Set tags
+        id: tag_name
+        run: |
+          SHA=${GITHUB_SHA::7}
+          echo "SHA_SHORT=${SHA}" >> $GITHUB_OUTPUT
+          # echo "::set-output name=BRANCH::${{ github.event.release.target_commitish}}" # this for on release
+          # echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT #  Try to get branch for PR
+          # TAGNAME=${IMAGE_NAME}:${SHA}
+          # echo "TAGNAME=${TAGNAME}" >> $GITHUB_OUTPUT
+          BRANCH=${GITHUB_REF#refs/heads/}
+          DH_TAGS="${SHA} ${BRANCH}"
+          GH_TAGS="${SHA} ${BRANCH}"
+
+          BASE_IMAGE_NAME=${IMAGE_NAME}:${SHA}
+
+          echo "BASE_IMAGE_NAME=${BASE_IMAGE_NAME}" >> $GITHUB_OUTPUT
+          DH_IMAGE_NAME=${DOCKERHUB_REPO}/${IMAGE_NAME}
+          echo "DH_IMAGE_NAME: ${DH_IMAGE_NAME}"
+          echo "DH_IMAGE_NAME=${DH_IMAGE_NAME}" >> $GITHUB_OUTPUT
+          GH_IMAGE_NAME="ghcr.io/${{ github.repository_owner }}/${IMAGE_NAME}"
+          echo "GH_IMAGE_NAME: ${GH_IMAGE_NAME}"
+          echo "GH_IMAGE_NAME=${GH_IMAGE_NAME}" >> $GITHUB_OUTPUT
+          if [[ $BRANCH == $LATEST_BRANCH ]]; then
+            echo "Tagging $BRANCH as 'latest'"
+            DH_TAGS+=" latest"
+            GH_TAGS+=" latest"
+          fi
+
+          echo "DH tag commands"
+          for tag in ${DH_TAGS}; do
+            echo "docker tag ${BASE_IMAGE_NAME} ${DH_IMAGE_NAME}:${tag}"
+          done
+          echo "GHCR tag commands"
+          for tag in ${GH_TAGS}; do
+            echo "docker tag ${BASE_IMAGE_NAME} ${GH_IMAGE_NAME}:${tag}"
+          done
+
+          echo "DH_TAGS=${DH_TAGS}" >> $GITHUB_OUTPUT
+          echo "GH_TAGS=${GH_TAGS}" >> $GITHUB_OUTPUT
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Test building image
+        run: |
+          IMAGE=${{ steps.tag_name.outputs.BASE_IMAGE_NAME }}
+          echo "PWD: $PWD"
+          echo "ls -l"
+          ls -l
+          git config --global --add safe.directory /home/emel/dev/actions-runner/_work/clio/clio
+          ./docker/build_image.sh ${IMAGE}
+          docker run --rm ${IMAGE} /test.sh
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_PW }}
+
+      - name: Push to dockerhub
+        run: |
+          for tag in ${{ steps.tag_name.outputs.DH_TAGS }}; do
+            echo "Tagging ${{ steps.tag_name.outputs.BASE_IMAGE_NAME}} to ${{ steps.tag_name.outputs.DH_IMAGE_NAME }}:${tag} for Docker Hub"
+            docker tag ${{ steps.tag_name.outputs.BASE_IMAGE_NAME}} ${{ steps.tag_name.outputs.DH_IMAGE_NAME }}:${tag}
+            echo "Pushing ${{ steps.tag_name.outputs.DH_IMAGE_NAME}}:${tag} to Docker Hub"
+            docker push ${{ steps.tag_name.outputs.DH_IMAGE_NAME}}:${tag}
+          done
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push to ghcr
+        run: |
+          for tag in ${{ steps.tag_name.outputs.GH_TAGS }}; do
+            echo "Tagging ${{ steps.tag_name.outputs.BASE_IMAGE_NAME}} to ${{ steps.tag_name.outputs.GH_IMAGE_NAME }}:${tag} for GHCR"
+            docker tag ${{ steps.tag_name.outputs.BASE_IMAGE_NAME}} ${{ steps.tag_name.outputs.GH_IMAGE_NAME }}:${tag}
+            echo "Pushing ${{ steps.tag_name.outputs.GH_IMAGE_NAME }}:${tag} to GHCR"
+            docker push ${{ steps.tag_name.outputs.GH_IMAGE_NAME }}:${tag}
+          done
