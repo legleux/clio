@@ -75,6 +75,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PW }}
 
       - name: Push to dockerhub
+        continue-on-error: true
         run: |
           for tag in ${{ steps.tag_name.outputs.DH_TAGS }}; do
             echo "Tagging ${{ steps.tag_name.outputs.BASE_IMAGE_NAME}} to ${{ steps.tag_name.outputs.DH_IMAGE_NAME }}:${tag} for Docker Hub"
@@ -91,6 +92,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push to ghcr
+        continue-on-error: true
         run: |
           for tag in ${{ steps.tag_name.outputs.GH_TAGS }}; do
             echo "Tagging ${{ steps.tag_name.outputs.BASE_IMAGE_NAME}} to ${{ steps.tag_name.outputs.GH_IMAGE_NAME }}:${tag} for GHCR"
