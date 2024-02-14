@@ -19,6 +19,7 @@ jobs:
         run: echo "${{ secrets.DOCKERHUB_PW }}" | docker login -u "${{ secrets.DOCKERHUB_USER }}" --password-stdin
       - name: build the image
         run: |
+          cd docker-multiarch
           docker buildx build --push \
-            --tag legleux/multiarch-example:latest \
+            --tag legleux/multiarch-example:now \
             --platform linux/amd64,linux/arm64 .
