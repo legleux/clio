@@ -104,7 +104,7 @@ include(CMakeParseArguments)
 option(CODE_COVERAGE_VERBOSE "Verbose information" FALSE)
 
 # Check prereqs
-find_program(GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/scripts/test)
+find_program(GCOVR_PATH gcovr PATHS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/test)
 
 if (DEFINED CODE_COVERAGE_GCOV_TOOL)
   set(GCOV_TOOL "${CODE_COVERAGE_GCOV_TOOL}")

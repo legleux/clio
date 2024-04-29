@@ -21,7 +21,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set_property(CACHE san PROPERTY STRINGS ";undefined;memory;address;thread")
 # ========================================================================== #
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 # Include required modules
 include(Ccache)
@@ -30,7 +30,7 @@ include(ClangTidy)
 
 add_library(clio_options INTERFACE)
 target_compile_features(clio_options INTERFACE cxx_std_23) # Clio needs c++23 but deps can remain c++20 for now
-target_include_directories(clio_options INTERFACE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(clio_options INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Set coverage build options
 if (coverage)
