@@ -22,7 +22,7 @@ endif ()
 
 if (NOT (BRANCH MATCHES master OR BRANCH MATCHES release/*)) # for develop and any other branch name
                                                              # YYYYMMDDHMS-<branch>-<git-rev>
-  set(GIT_COMMAND show -s --date=format:'%Y%m%d%H%M%S' --format=%cd)
+  set(GIT_COMMAND show -s --date=format:%Y%m%d%H%M%S --format=%cd)
   execute_process(
     COMMAND ${GIT_EXECUTABLE} ${GIT_COMMAND}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
