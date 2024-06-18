@@ -4,7 +4,8 @@ COPY . .
 
 RUN conan install . --build missing -if build
 
-RUN conan build .  -if build && cmake --build build  --target install/strip
+RUN conan build .  -if build
+RUN cmake --build build/Release  --target install/strip
 
 FROM debian:bullseye-slim as clio
 
