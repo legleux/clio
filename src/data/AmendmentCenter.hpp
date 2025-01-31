@@ -133,7 +133,6 @@ struct Amendments {
     REGISTER(AMMClawback);
     REGISTER(Credentials);
     REGISTER(DynamicNFT);
-    // TODO: Add PermissionedDomains related RPC changes
     REGISTER(PermissionedDomains);
 
     // Obsolete but supported by libxrpl
